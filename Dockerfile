@@ -1,22 +1,18 @@
-FROM python:3.11-slim
+FROM python:3.10-slim
 
 WORKDIR /app
 
-# Install system dependencies
+# Install essential build system tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first
+# Copy and install dependencies cleanly
 COPY requirements.txt .
-
-# CRITICAL: Upgrade pip first so it can properly resolve modern TensorFlow wheels
 RUN pip install --no-cache-dir --upgrade pip
-
-# Install project requirements
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application files
+# Copy project files
 COPY . .
 
 EXPOSE 5000
