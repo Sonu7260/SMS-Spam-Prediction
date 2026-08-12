@@ -6,19 +6,18 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 app = Flask(__name__)
 
-# Model configuration using your specified model file name
+# Model configuration using your model name
 MODEL_PATH = "model (2).keras"
 TOKENIZER_PATH = "tokenizer.pkl"
 
-# Load the Sequential spam classification model and tokenizer safely
+# Load model and tokenizer safely
 model = keras.models.load_model(MODEL_PATH)
 
 with open(TOKENIZER_PATH, "rb") as handle:
   tokenizer = pickle.load(handle)
 
-MAX_LEN = 50  # Must match your model's input shape configuration[cite: 1]
+MAX_LEN = 50
 
-# Embedded HTML Template containing the entire frontend UI
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
@@ -52,7 +51,7 @@ HTML_TEMPLATE = """
             background: var(--card-bg);
             padding: 2.5rem;
             border-radius: 1rem;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
             margin: 1rem;
         }
         h1 {
@@ -87,7 +86,6 @@ HTML_TEMPLATE = """
             font-size: 1rem;
             resize: vertical;
             box-sizing: border-box;
-            transition: border-color 0.2s, box-shadow 0.2s;
         }
         textarea:focus {
             outline: none;
@@ -114,7 +112,6 @@ HTML_TEMPLATE = """
             padding: 1.25rem;
             border-radius: 0.5rem;
             text-align: center;
-            animation: fadeIn 0.3s ease-in-out;
         }
         .spam {
             background-color: #fee2e2;
@@ -134,16 +131,12 @@ HTML_TEMPLATE = """
             margin: 0;
             font-size: 0.875rem;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🛡️ Spam Detector</h1>
-        <p class="subtitle">Analyze text or email contents instantly using your Sequential RNN spam classification model.</p>
+        <p class="subtitle">AWS Containerized RNN Model Deployment</p>
         
         <form method="POST">
             <div class="form-group">
@@ -174,15 +167,12 @@ def home():
   if request.method == "POST":
     email_text = request.form.get("email_text", "")
     if email_text.strip():
-      # Preprocess text sequence
       sequence = tokenizer.texts_to_sequences([email_text])
       padded_sequence = pad_sequences(sequence, maxlen=MAX_LEN, padding="post")
 
-      # Predict using the loaded Sequential model
       score = float(model.predict(padded_sequence)[0][0])
       probability = round(score * 100, 2)
 
-      # Threshold evaluation (0.5)
       if score > 0.5:
         prediction = "SPAM"
       else:
